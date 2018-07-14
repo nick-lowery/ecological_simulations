@@ -1,8 +1,28 @@
 function chaos_spatial_correlation_function(imdir)
 
-%%% script to run pairwise spatial autocorrelations between replicates
-% of chaos simulations (small fraction "dinit" of pixels reqired from
-% otherwise identical initial conditions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Nick Lowery and Tristan Ursell
+% 2018
+%
+% Structured environments fundamentally alter dynamics and stability of ecological communities
+% https://www.biorxiv.org/content/early/2018/07/10/366559
+% 
+% This function calculates the spatiotemporal correlations between simulation
+% images generated with the LV_competition_chaos function, and writes a data
+% file containing the temportal correlation vectors.
+%
+% Input parameters:
+% imdir = name of directories containing simulations to be compared,
+%	as written in the LV_competition_chaos.m script, and truncated to 
+% 	omit replicates
+% For example, for simulation directories
+% 3sp_LV_comp_chaos...dinit-0.1_rep-1
+% 3sp_LV_comp_chaos...dinit-0.1_rep-2
+% 3sp_LV_comp_chaos...dinit-0.1_rep-3
+% ...
+% imdir = 3sp_LV_comp_chaos...dinit-0.1
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 drawnow
 
@@ -37,18 +57,18 @@ if pillarq == 1
     % construct center-distance matrix
     Xmat = ones(sy,1)*(1:sx);
     Ymat = (1:sy)'*ones(1,sx);
-    dist_mat = sqrt((Xmat-sx/2).^2+(Ymat-sy/2).^2);
+    dist_mat = sqrt((Xmat-sx/2).^2 + (Ymat-sy/2).^2);
 
     %form hexagonal grid position arrays
     x_cent0 = 0:dx:(L+dx);
-    y_cent0 = [0:(sqrt(3)/2*dx):(L+dx*sqrt(3)/2)]+R;
+    y_cent0 = [0:(sqrt(3)/2*dx):(L+dx*sqrt(3)/2)] + R;
 
     x_cent = zeros(length(y_cent0),length(x_cent0));
     for i = 1:length(y_cent0)
         if mod(i,2) == 1
-            x_cent(i,:) = x_cent0+dx/4;
+            x_cent(i,:) = x_cent0 + dx/4;
         else
-            x_cent(i,:) = x_cent0-dx/4;
+            x_cent(i,:) = x_cent0 - dx/4;
         end
     end
 
@@ -61,15 +81,15 @@ if pillarq == 1
     filt_all = ones(size(Xmat));
     for i = 1:length(x_cent0)
         for j = 1:length(y_cent0)
-            filt_temp = ((Xmat-x_cent(j,i)).^2+(Ymat-y_cent(j,i)).^2)>=R^2;
-            filt_all = filt_all.*filt_temp;
+            filt_temp = ((Xmat-x_cent(j,i)).^2 + (Ymat-y_cent(j,i)).^2) >= R^2;
+            filt_all = filt_all .* filt_temp;
         end
     end
 
     dbound = -L/2;
     filt_all_temp = zeros(size(filt_all));
-    filt_all_temp(1:round(L/2)-dbound,:) = filt_all(1:round(L/2)-dbound,:);
-    filt_all_temp(round(L/2)-dbound+1:end,:) = 1;
+    filt_all_temp(1:round(L/2) - dbound,:) = filt_all(1:round(L/2) - dbound,:);
+    filt_all_temp(round(L/2) - dbound + 1:end,:) = 1;
     filt_all = filt_all_temp;
 
     %%% End pillar mask %%%%%%%%%%%%%%%%%%
@@ -82,6 +102,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set image subsampling frequency (for speed)
+	% note total number of images will depend on N and showt of simulation
 subsamp = 5;
 img_vec = 1:subsamp:5000;
 nfiles = length(img_vec);
@@ -173,6 +194,6 @@ save([imdir '_cor.mat'], 'cor_mat', 'cor_mean', 'cor_sd', 'L', 'R', 'dx', 'dinit
 
 disp(['Files written, done with ' imdir])
 
-exit
+%exit
 
 end
