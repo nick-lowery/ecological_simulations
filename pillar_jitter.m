@@ -1,4 +1,17 @@
-%%% Reconstruct pillar mask %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Nick Lowery and Tristan Ursell
+% 2018
+%
+% Structured environments fundamentally alter dynamics and stability of ecological communities
+% https://www.biorxiv.org/content/early/2018/07/10/366559
+% 
+% This script generates pillar lattices with random noise added to the pillar
+% sizes and/or spacings.  Sample grids used in the paper are provided at 
+% https://github.com/nick-lowery/ecological_simulations/jittered_grids/
+% Grids are manually curated to make sure pillars do not overlap or are spaced
+% too closely for the diffusion process to function properly.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % define relevant parameters
 D = 15;
@@ -14,18 +27,18 @@ var_dx = 0; % relative to R; depends on dx
 % construct center-distance matrix
 Xmat = ones(sy,1)*(1:sx);
 Ymat = (1:sy)'*ones(1,sx);
-dist_mat = sqrt((Xmat-sx/2).^2+(Ymat-sy/2).^2);
+dist_mat = sqrt((Xmat - sx/2).^2 + (Ymat - sy/2).^2);
 
 %form hexagonal grid position arrays
-x_cent0 = 0:dx:(L+dx);
-y_cent0 = [0:(sqrt(3)/2*dx):(L+dx*sqrt(3)/2)]+R;
+x_cent0 = 0:dx:(L + dx);
+y_cent0 = [0:(sqrt(3)/2*dx):(L + dx*sqrt(3)/2)] + R;
 
-x_cent = zeros(length(y_cent0),length(x_cent0));
+x_cent = zeros(length(y_cent0), length(x_cent0));
 for i = 1:length(y_cent0)
     if mod(i,2) == 1
-        x_cent(i,:) = x_cent0+dx/4;
+        x_cent(i,:) = x_cent0 + dx/4;
     else
-        x_cent(i,:) = x_cent0-dx/4;
+        x_cent(i,:) = x_cent0 - dx/4;
     end
 end
 
@@ -34,7 +47,7 @@ for j = 1:length(x_cent0)
     y_cent(:,j) = y_cent0';
 end
 
-%%% jitter pillar placement
+%%% jitter pillar placement %%%
 
 % select random angle
 theta = 360*rand(size(x_cent));
@@ -53,25 +66,25 @@ for i = 1:length(x_cent0)
         if R_jitter <= D/2
             R_jitter = D/2 + 0.1;
         end
-        filt_temp = ((Xmat-x_jitt(j,i)).^2+(Ymat-y_jitt(j,i)).^2) >= R_jitter^2;
-        filt_all = filt_all.*filt_temp;
+        filt_temp = ((Xmat - x_jitt(j,i)).^2 + (Ymat - y_jitt(j,i)).^2) >= R_jitter^2;
+        filt_all = filt_all .* filt_temp;
     end
 end
 
 dbound = -L/2;
 filt_all_temp = zeros(size(filt_all));
-filt_all_temp(1:round(L/2)-dbound,:) = filt_all(1:round(L/2)-dbound,:);
-filt_all_temp(round(L/2)-dbound+1:end,:) = 1;
+filt_all_temp(1:round(L/2) - dbound,:) = filt_all(1:round(L/2) - dbound,:);
+filt_all_temp(round(L/2) - dbound + 1:end,:) = 1;
 filt_all = filt_all_temp;
 
-%%% End pillar mask %%%%%%%%%%%%%%%%%%
+%%% plot pillar mask for manual validation %%%
 
 imagesc(filt_all)
 
-%{
-grids = dir('jitter*.mat');
-grid_names = {grids(:).name};
-str = ['R-' num2str(R) '_dx-' num2str(dx/R) '_vR-' num2str(jitt_R) '_vdx-' num2str(jitt_dx) '_num-' num2str(jitt_num)];
-filt_all_temp = load(string(grid_names(find(contains(grid_names, str)))));
-filt_all = filt_all_temp.filt_all;
-%}
+%%% write file %%%
+
+%id number for grid - don't forget to change when saving!
+grid_num = 1;
+
+save(['jitter_grid_R-' num2str(R) '_dx-' num2str(dx) '_vR-' num2str(var_R) ...
+            '_vdx-' num2str(var_dx) '_num-' num2str(grid_num) '.mat'], 'filt_all')
