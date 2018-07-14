@@ -1,4 +1,4 @@
-function LV_competition_two_species_asym_pink_lattice(L,N,D,P,delta,pillarq,R,rep,seed)
+function LV_competition_two_species_asym(L,N,D,P,delta,pillarq,R,rep,seed)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Nick Lowery and Tristan Ursell
