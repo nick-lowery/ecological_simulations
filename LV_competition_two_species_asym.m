@@ -23,9 +23,8 @@ function LV_competition_two_species_asym(L,N,D,P,delta,pillarq,R,rep,seed)
 % delta = degree of competition asymmetry (species A gets P + delta, B gets P - delta)
 % pillarq = logical (1,0); should pillars be included?
 % R = pillar radius (pixels)
-% dinit = proportion of pixels to be randomly reassigned after initialization
-% rep = UNIQUE replicate identifier - this also sets the seed for random pixel
-%	reassignment	
+% rep = unique replicate identifier
+% seed = sets random seet for density matrix initialization
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
