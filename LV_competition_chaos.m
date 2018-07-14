@@ -9,8 +9,11 @@ function LV_competition_chaos(L,N,D,P,pillarq,R,dx_mult,dinit,rep)
 % 
 % This function runs a non-dimensionalized modified 2D Lotka-Volterra ecological
 % simulation, and outputs images of the simulation and a file containing the 
-% associated metadata.
-% It required the image_save.m script to be in the active directory.
+% associated metadata. It required the image_save.m script to be in the active 
+% directory.  This function is specific for testing the sensitivity of simulations
+% to perturbations in initial conditions (associated with Figure 4 in manuscript),
+% by randomly reassigning some proportion (dinit) of the initialized species
+% density matrices.
 %
 % Input parameters:
 % L = size of the simulation box (pixels)
