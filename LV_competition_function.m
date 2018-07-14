@@ -232,7 +232,7 @@ meanC_out = meanC(1:showt:N);
 scale_fac_out = scale_fac(1:showt:N, :)
 
 save([file1 '_metadata.mat'], 'L', 'N', 'D', 'P', 'pillarq', 'R', 'dx', 'dt', 'dsc', 'seed', ...
-	'meanA_out', 'meanB_out', 'meanC_out', 'scale_fac', 'rep')
+	'meanA_out', 'meanB_out', 'meanC_out', 'scale_fac', 'rep', 'filt_all_weight')
 
 disp(['Done with ' file1 '.'])
 
