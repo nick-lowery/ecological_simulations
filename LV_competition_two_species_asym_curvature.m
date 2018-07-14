@@ -1,68 +1,69 @@
-function LV_competition_two_species_asym_curvature_noclock(W,H,D,P,delta,R)
+function LV_competition_two_species_asym_curvature(W,H,D,P,delta,R)
 
-%Tristan & Nick -- LV Spatial Competition Model
-%Sept 2017
-% ND = non-dimensional
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Nick Lowery and Tristan Ursell
+% 2018
 %
+% Structured environments fundamentally alter dynamics and stability of ecological communities
+% https://www.biorxiv.org/content/early/2018/07/10/366559
+% 
+% This function runs a non-dimensionalized modified 2D Lotka-Volterra ecological
+% simulation of two mutally killing species, for the specific purpose of 
+% calculating the critical curvature of the interface between two species with
+% asymmetric competitive fitness. It requires the image_save.m script to be in 
+% the active directory. The simulation stops when dynamics ceases either due to
+% stabilization of the competition interface or extinction of one of the species.
+%
+% Input parameters:
+% W = width of the simulation box (pixels)
+% H = height of the simulation box (pixels) - this determines the open space
+%	between pillars
+% N = number of simulation iterations (dt units, specified in the script)
+% D = diffusion coefficient (dimensionless)
+% P = average interaction strength (dimensionless)
+% delta = degree of competition asymmetry (species A gets P + delta, B gets P - delta)
+% R = pillar radius (pixels)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%*******************************************
+%********* INITIALIZATION ******************
+%*******************************************
 
 %output images
 imageq=1;
 
-%box size (grid points)
-%H=220;
-%W=350;
-
-%number of time steps
-%N=100000;
-
 %time step in ND units
 dt=0.01;
-
-%ND diffusion coefficient
-%D=15;
-
-%interaction parameter (in units of carrying capacity)
-%P=0.1;
-
-%competition asymmetry
-%delta=0.024;
 
 %local concentration discrete cutoff (will be set to 0 below this value)
 dsc=0.001;
 
-%intialize the density matrices
-%%{
-    %block seeding
-    A = zeros(H,W);
-    A(:,1:W/2) = 0.3;
-    B = zeros(H,W);
-    B(:,W/2:W) = 0.3;
-%}
-
 %frequency to show results
 showt=50;
 
-%pillar radius
-%R=50;
-
-%*************************************************************************
+%intialize the density matrices in blocks
+A = zeros(H,W);
+A(:,1:W/2) = 0.3;
+B = zeros(H,W);
+B(:,W/2:W) = 0.3;
 
 %diffusion convolution filter
-sigma=sqrt(4*D*dt);
-if mod(ceil(4*sigma),2)==0
-    win_sz=ceil(4*sigma)+1;
+sigma = sqrt(4*D*dt);
+if mod(ceil(3*sigma), 2) == 0
+    win_sz = ceil(3*sigma) + 1;
 else
-    win_sz=ceil(4*sigma);
+    win_sz = ceil(3*sigma);
 end
-Gauss=fspecial('gaussian',[win_sz,win_sz],sigma);
-rescale_filt=1./conv2(ones(size(A)),Gauss,'same');
+Gauss = fspecial('gaussian', [win_sz,win_sz], sigma);
+rescale_filt = 1 ./ conv2(ones(size(A)), Gauss, 'same');
 
-if min(H,W)<win_sz
+if min(H,W) < win_sz
     warning('Diffusion window size is larger than simulation box.')
 end
 
 %file IO
-file1=['2sp_LV_comp_curve_H-' num2str(H) ...
+file1 = ['2sp_LV_comp_curve_H-' num2str(H) ...
        '_W-' num2str(W) ...
        '_D-' num2str(D) ...
        '_P-' num2str(P) ...
@@ -75,89 +76,89 @@ file1=['2sp_LV_comp_curve_H-' num2str(H) ...
 %*******************************************
 
 %create spatial matrices / filters
-Xmat=ones(H,1)*(1:W);
-Ymat=(ones(W,1)*(1:H))';
+Xmat = ones(H,1)*(1:W);
+Ymat = (ones(W,1)*(1:H))';
 
 %pillar locations
-x_cent=[W/2 W/2];
-y_cent=[R H-R];    
+x_cent = [W/2 W/2];
+y_cent = [R H-R];    
 
 %create pillars
-filt_all=ones(size(Xmat));
-for i=1:length(x_cent)
-    filt_temp=((Xmat-x_cent(i)).^2+(Ymat-y_cent(i)).^2)>=R^2;
-    filt_all=filt_all.*filt_temp;
+filt_all = ones(size(Xmat));
+for i = 1:length(x_cent)
+    filt_temp = ((Xmat - x_cent(i)).^2 + (Ymat - y_cent(i)).^2) >= R^2;
+    filt_all = filt_all .* filt_temp;
 end
 
 %prepare reflecting boundary conditions in grid
-conv_filt=conv2(filt_all,Gauss,'same');
-rescale_filt=filt_all./conv_filt;
-rescale_filt(isnan(rescale_filt))=0;
+conv_filt = conv2(filt_all, Gauss, 'same');
+rescale_filt = filt_all ./ conv_filt;
+rescale_filt(isnan(rescale_filt)) = 0;
 
 %*******************************************
-%*********  END PILLARS ********************
+%********* SIMULATION **********************
 %*******************************************
 
-q=0;
+q = 0;
 arrest = 0;
 tic
-tnow=toc;
+tnow = toc;
 while arrest < 1
     %track image for comparison
-    Aprev=A;
-    Bprev=B;
+    Aprev = A;
+    Bprev = B;
     
     %convolutions
-    A=conv2(A,Gauss,'same').*rescale_filt;
-    B=conv2(B,Gauss,'same').*rescale_filt;
+    A = conv2(A, Gauss, 'same') .* rescale_filt;
+    B = conv2(B, Gauss, 'same') .* rescale_filt;
     
-    %population networks    
-    dA=dt*A.*(1-(A+B)).*(1-B/(P+delta));
-    dB=dt*B.*(1-(A+B)).*(1-A/(P-delta));
+    %interspecies interactions    
+    dA = dt * A .* (1 - (A+B)) .* (1 - B / (P + delta));
+    dB = dt * B .* (1 - (A+B)) .* (1 - A / (P - delta));
     
     %deterministic update populations
-    A=A+dA;
-    B=B+dB;
+    A = A + dA;
+    B = B + dB;
     
     %hard upper bound
-    A(A>1)=1;
-    B(B>1)=1;
+    A(A > 1) = 1;
+    B(B > 1) = 1;
     
     %discrete cutoff (hard lower bound)
-    A(A<dsc)=0;
-    B(B<dsc)=0;
+    A(A < dsc) = 0;
+    B(B < dsc) = 0;
     
-    if and(max(abs(Aprev-A))<(100*eps), max(abs(Bprev-B))<(100*eps))
+    if and(max(abs(Aprev - A)) < (100*eps), max(abs(Bprev - B)) < (100*eps))
         disp('Simulation terminated due to extinction or inactivity.')
         arrest = 1;
 	break
     end
     
-    q = q+1;
+    q = q + 1;
 
     %output
-    if mod(q,showt)==1
-        tnow_temp=toc;
-        tnow=tnow_temp-tnow;
+    if mod(q,showt) == 1
+        tnow_temp = toc;
+        tnow = tnow_temp - tnow;
         disp(['step ' num2str(i) ' for ' file1 ' in ' num2str(tnow) 's'])
-        tnow=toc;
+        tnow = toc;
     end
 end
 
 %***********************************************
-%************ OUTPUT ***************************
+%************ FINAL IMAGE **********************
 %***********************************************
 
 %grey filter 
-Atemp=A;
-Btemp=B;
-Atemp(filt_all==0)=1/2;
-Btemp(filt_all==0)=1/2;
+Atemp = A;
+Btemp = B;
+Atemp(filt_all == 0) = 1/2;
+Btemp(filt_all == 0) = 1/2;
 
-im_out = zeros(H,W,3,'uint8');
-im_out(:,:,1)=uint8(Atemp*255);
-im_out(:,:,2)=uint8(Btemp*255);
-im_out(:,:,3)=uint8(Atemp*255);
+im_out = zeros(H, W, 3, 'uint8');
+im_out(:,:,1) = uint8(Atemp * 255);
+im_out(:,:,2) = uint8(Btemp * 255);
+im_out(:,:,3) = uint8(Atemp * 255);
 
 %***********************************************
 %************ CURVATURE ************************
@@ -190,10 +191,10 @@ else
     y3 = curve_props.Extrema(5,2);
 
     % calculate curvature
-    a = sqrt((x1-x2)^2+(y1-y2)^2);
-    b = sqrt((x2-x3)^2+(y2-y3)^2);
-    c = sqrt((x3-x1)^2+(y3-y1)^2);
-    A = 1/2*abs((x1-x2)*(y3-y2)-(y1-y2)*(x3-x2)); 
+    a = sqrt((x1 - x2)^2 + (y1 - y2)^2);
+    b = sqrt((x2 - x3)^2 + (y2 - y3)^2);
+    c = sqrt((x3 - x1)^2 + (y3 - y1)^2);
+    A = 1/2 * abs((x1 - x2) * (y3-y2) - (y1-y2) * (x3-x2)); 
     if a*b*c == 0
 	K = 0;
     else 
@@ -204,24 +205,17 @@ end
 disp(['extinction = ' num2str(extinct) ', K = ' num2str(K)])
 
 %***********************************************
-%************ FIGURES **************************
+%************ METADATA *************************
 %***********************************************
 
 if imageq==1            
     image_save(im_out,[file1 '.png'])
-    save([file1 '.mat'], 'W','H','dt','dsc','D','P','delta','R','K','extinct')
 end
+
+save([file1 '.mat'], 'W','H','dt','dsc','D','P','delta','R','K','extinct')
 
 disp(['Done with ' file1 '.'])
 
-exit
+%exit
 
 end
-
-
-
-
-
-
-
-
