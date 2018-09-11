@@ -87,6 +87,7 @@ A = 0.1 * A;
 B = 0.1 * B;
 
 %pillar spacing (units of R)
+    % note this is a fixed lattice constant; change the coefficient to change relative pillar spacing
 dx=3*R;
 
 %diffusion convolution filter
@@ -136,10 +137,7 @@ if pillarq == 1
     %create spatial matrices / filters
     Xmat = ones(L,1)*(1:L);
     Ymat = Xmat';
-    
-    %create centers for obstruction pattern
-    dx = dx_mult*R;
-    
+       
     %form hexagonal grid position arrays
     x_cent0 = 0:dx:(L+dx);
     y_cent0 = [0:(sqrt(3)/2*dx):(L+dx*sqrt(3)/2)] + R;
