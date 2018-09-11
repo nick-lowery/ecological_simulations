@@ -170,10 +170,7 @@ if pillarq == 1
     filt_all_temp(1:round(L/2) - dbound,:) = filt_all(1:round(L/2) - dbound,:);
     filt_all_temp(round(L/2) - dbound + 1:end,:) = 1;
     filt_all = filt_all_temp;
-    
-    %calculate weight of non-pillar area for calcualting mean abundances
-    filt_all_weight = sum(filt_all(:));
-    
+        
     %prepare reflecting boundary conditions in grid
     conv_filt = conv2(filt_all, Gauss, 'same');
     rescale_filt = filt_all ./ conv_filt;
@@ -182,6 +179,9 @@ else
     R = 0; dx = 0;
     filt_all = ones(L,L);
 end
+
+%calculate weight of non-pillar area for calcualting mean abundances
+filt_all_weight = sum(filt_all(:));
 
 %*******************************************
 %********* SIMULATION **********************
