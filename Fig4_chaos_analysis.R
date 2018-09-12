@@ -9,8 +9,8 @@
 # Structured environments fundamentally alter dynamics and stability of ecological communities
 # https://www.biorxiv.org/content/early/2018/07/10/366559
 # 
-# The script reads in correlation and metadata files generated from the LV_competition_chaos
-# and chaos_spatial_correlation_function scripts. The functions to generate the data from the
+# The script reads in correlation and metadata files generated from the LV_competition_chaos.m
+# and chaos_spatial_correlation_function.m scripts. The functions to generate the data from the
 # raw .mat data files are included but commented out.
 
 ###############################################################################
@@ -94,7 +94,7 @@ chaos.corr.plot <- chaos.corr %>%
          R = fct_relevel(factor(R), "0", after = Inf),
          dinit = 100*dinit)
 
-# color palette (function generated using choose_palette() GUI)
+# color palette (function generated using choose_palette() GUI from colorspace package)
 pal <- function (n, h = c(300, 75), c. = c(35, 95), l = c(15, 90), 
                  power = c(0.8, 1.2), fixup = TRUE, gamma = NULL, alpha = 1, 
                  ...) 
