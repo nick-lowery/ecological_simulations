@@ -1,4 +1,4 @@
-function LV_competition_two_species_asym_regLV(L,N,D,alpha,pillarq,R,rep,seed)
+function LV_competition_two_species_asym_regLV(L,N,D,P,delta,pillarq,R,rep,seed)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Nick Lowery and Tristan Ursell
@@ -21,8 +21,10 @@ function LV_competition_two_species_asym_regLV(L,N,D,alpha,pillarq,R,rep,seed)
 % L = size of the simulation box (pixels)
 % N = number of simulation iterations (dt units, specified in the script)
 % D = diffusion coefficient (dimensionless)
-% alpha = competitive interaction coefficient;
-%     B gets advantage with alpha > 1 and dA = dt * A .* (1 - (A+B*alpha))
+% P = average competition coefficient
+% delta = difference in competitive interaction coefficient (average = 0.1)
+%     A has advantage, where dA = dt * A .* (1 - (A+B*(1+1/(P-delta))) and
+%     dB = dt * B .* (1 - (B+A*(1+1/(P+delta)))
 % pillarq = logical (1,0); should pillars be included?
 % R = pillar radius (pixels)
 % rep = unique replicate identifier
@@ -47,7 +49,7 @@ dt = 0.01;
 dsc = 0.01;
 
 %frequency to show results
-showt = 40;
+showt = 100;
 
 %pink noise seeding of density matrices
 sigmaIC = 2;
@@ -112,7 +114,8 @@ if imageq == 1
 file1 = ['2sp_LV_comp_asym_regLV_L-' num2str(L) ...
        '_N-' num2str(N) ...
        '_D-' num2str(D) ...
-       '_alpha-' num2str(alpha) ...
+       '_P-' num2str(P) ...
+       '_delta-' num2str(delta) ...
        '_pillars-' num2str(pillarq) ...
        '_R-' num2str(R) ...
        '_dx-' num2str(dx) ...
@@ -198,8 +201,8 @@ for i = 1:N
     B = conv2(B, Gauss, 'same') .* rescale_filt;
     
     %interspecies interactions
-    dA = dt * A .* (1 - (A+B*alpha));
-    dB = dt * B .* (1 - (A+B));
+    dA = dt * A .* (1 - (A+B*(1+1/(P-delta))));
+    dB = dt * B .* (1 - (B+A*(1+1/(P+delta))));
    
     if (sum(abs(dA(:))) + sum(abs(dB(:)))) < dsc
 	t_stop = i;
@@ -275,7 +278,7 @@ else
     t_stop = NaN;
 end
 
-save([file1 '_metadata.mat'], 'L', 'N', 'D', 'alpha', 'pillarq', 'R', 'dx', 'dt', 'dsc', ...
+save([file1 '_metadata.mat'], 'L', 'N', 'D', 'P', 'delta', 'pillarq', 'R', 'dx', 'dt', 'dsc', ...
 	'meanA_out', 'meanB_out', 'scale_fac_out', 'rep', 'seed', 'filt_all_weight', 't_stop')
 
 
