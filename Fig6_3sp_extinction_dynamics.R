@@ -26,7 +26,7 @@ library(tidyverse)
 library(cowplot)
 
 # # read in raw data files (long)
-# trans.metadata.raw <- list.files("E:/ecological_modelling/3sp_trans_prob", pattern = ".mat", full.names = T) %>%
+# trans.metadata.raw <- list.files("3sp_trans_prob", pattern = ".mat", full.names = T) %>%
 #   lapply(., readMat)
 # 
 # # get data organized into tbl
@@ -58,7 +58,7 @@ library(cowplot)
 #   select(ic, t.extinct) 
 #   
 # write_csv(t.extinct, "dynamic_transition_extinction_times.csv")
-t.extinct <- read_csv("E:/ecological_modelling/dynamic_transition_extinction_times.csv", col_types = "cd")
+t.extinct <- read_csv("dynamic_transition_extinction_times.csv", col_types = "cd")
 
 # extract extinction times by initial condition 
 chaos.extinct <- t.extinct$t.extinct[1:1000]
@@ -130,7 +130,7 @@ for( i in 1:nrow(ls.df) ) {
 }
 
 # save results
-write_csv(ls.df, "E:/ecological_modelling/mixed_ic_ls_dist_fits.csv")
+# write_csv(ls.df, "mixed_ic_ls_dist_fits.csv")
 
 # examine fits
 min.sse <- ls.df[which.min(ls.df$sse),]
@@ -173,7 +173,7 @@ for( i in 1:nrow(ls.chaos.df) ) {
 }
 
 # save output
-write_csv(ls.chaos.df, "E:/ecological_modelling/chaos_ic_ls_dist_fits.csv")
+# write_csv(ls.chaos.df, "chaos_ic_ls_dist_fits.csv")
 
 # examine fits
 min.chaos.sse <- ls.chaos.df[which.min(ls.chaos.df$sse),]
@@ -193,7 +193,7 @@ lines(density(sample(seq(3000), 1000, replace = T,
 
 
 # Note:
-# cyclic initial conditions can't really be fit (only observed ~3% of data)
+# cyclic initial conditions can't really be fit (only observed extinction for ~3% of data)
 
 
 ### final figure ###
@@ -206,8 +206,8 @@ mix.fit <- read_csv("mixed_ic_ls_dist_fits.csv", col_types = "idddc")
 min.chaos.sse <- chaos.fit[which.min(chaos.fit$sse),]
 min.sse <- mix.fit[which.min(mix.fit$sse),]
 
-# since ggplot is weird about multiple y axes, use bootstrap histograms in lieu of probability density overlay
-  # to get matched scales on y-axis
+# since ggplot is weird about multiple y axes, use bootstrap histograms in lieu 
+  # of probability density overlay to get matched scales on y-axis
 set.seed(42)
 breaks <- seq(0, 10000, by = 100)
 
